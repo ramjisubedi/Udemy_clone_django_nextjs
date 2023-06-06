@@ -1,7 +1,7 @@
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
-
-from django.contrib.auth.models import BaseUserManager
-
+from django.contrib.auth.models import BaseUserManager, PermissionsMixin
+from courses.models import Course
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -15,13 +15,13 @@ class UserManager(BaseUserManager):
         if other_fields.get('is_superuser') is not True:
             return ValueError('Superuser must have is_superuser True')
         
-        return self.create_user(email,password,name,other_fields)
+        return self.create_user(email,password,name,**other_fields)
     
     def create_user(self,email,password,name,**other_fields):
         if not email:
             raise ValueError('You must be provided valid email')
         
-        email = self.email.normalize_email(email)
+        email = self.normalize_email(email)
 
         user = self.model(email=email,name=name, password=password,**other_fields)
 
@@ -30,3 +30,20 @@ class UserManager(BaseUserManager):
         user.save()
 
         return user
+    
+class User(AbstractBaseUser, PermissionsMixin):
+    name = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255, unique=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    is_staff = models.BooleanField(default=False)
+    paid_courses = models.ManyToManyField(Course)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name']
+
+    objects = UserManager()
+
+    def __str__(self) -> str:
+        return self.name+""+self.email
+
