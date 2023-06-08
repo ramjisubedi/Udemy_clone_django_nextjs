@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'udemy',
     'courses',
-    'users'
+    'users',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
