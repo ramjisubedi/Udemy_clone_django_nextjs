@@ -60,7 +60,27 @@ class CourseUnpaidSerializer(ModelSerializer):
     student_no = serializers.IntegerField(source='get_enrolled_student')
     total_lectures = serializers.IntegerField(source='get_total_lectures')
     total_duration = serializers.CharField(source='total_course_length')
+    image_url = serializers.CharField(source='get_absolute_image_url')
     class Meta:
         model = Course
         exclude =['id']
+
+class CourseListSerializer(ModelSerializer):
+
+    student_no = serializers.IntegerField(source='get_enrolled_student')
+    author = UserSerializer()
+    description = serializers.CharField(source='get_brief_description')
+    total_lectures = serializers.IntegerField(source='get_total_lectures')
+    class Meta:
+        model = Course
+        fields = '__all__'
+        # field_names = [
+        #     'course_uuid',
+        #     'student_no',
+        #     'author',
+        #     'price',
+        #     'image_url',
+        #     'description',
+        #     'total_lecturse'
+        #     ]
 

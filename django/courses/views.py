@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from .models import Sector, Course
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CourseDisplaySerializer, CourseUnpaidSerializer
+from .serializers import CourseDisplaySerializer, CourseListSerializer, CourseUnpaidSerializer
 
 class CourseHomeView(APIView):
 
@@ -36,3 +36,27 @@ class CourseDetail(APIView):
         serializer = CourseUnpaidSerializer(course[0])
 
         return Response(data = serializer.data, status = status.HTTP_200_OK)
+
+
+class SectorCourse(APIView):
+
+    def get(self, request, sector_uuid, *args, **kwargs):
+        sector = Sector.objects.filter(sector_uuid=sector_uuid)
+
+        if not sector:
+            return HttpResponseBadRequest('Sector does not exist')
+        
+        sector_courses = sector[0].related_course.all()
+        serializer = CourseListSerializer(sector_courses, many=True)
+        total_student=0
+
+        for course in sector_courses:
+            total_student+=course.get_enrolled_student()
+
+        return Response(
+            {
+                "data":serializer.data,
+                "sector_name":sector[0].name,
+                "total_student":total_student
+            }, status=status.HTTP_200_OK)
+        
