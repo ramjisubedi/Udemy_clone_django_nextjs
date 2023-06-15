@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from users.serializers import UserSerializer
-from .models import Comment, Course, Episode
+from .models import Comment, Course, Episode, CourseSection
 
 class CourseDisplaySerializer(ModelSerializer):
     student_no = serializers.IntegerField(source = 'get_enrolled_student')
@@ -37,6 +37,20 @@ class CourseSectionPaidSerializer(ModelSerializer):
     class Meta:
         fields = ['section_title','episodes','total_duration']
 
+
+class EpisodeUnPaidSerializer(ModelSerializer):
+    length = serializers.CharField(source='get_video_length_time')
+    class Meta:
+        model = Episode
+        exclude = ['file']
+
+
+class CourseSectionUnpaidSerializer(ModelSerializer):
+    episodes = EpisodeUnPaidSerializer(many=True)
+    total_duration = serializers.CharField(source = 'total_lenght')
+    class Meta:
+        model = CourseSection
+        fields = ['section_title', 'episodes', 'total_duration',]
 
 class CourseUnpaidSerializer(ModelSerializer):
 
