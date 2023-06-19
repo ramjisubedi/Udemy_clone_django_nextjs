@@ -1,10 +1,13 @@
 from django.http import HttpResponseBadRequest
 from rest_framework.views import APIView
+
+from users.models import User
 from .models import Sector, Course
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CourseDisplaySerializer, CourseListSerializer, CourseUnpaidSerializer
-
+from .serializers import CourseDisplaySerializer, CourseListSerializer, CourseUnpaidSerializer, CommentSerializer
+from django.db.models import Q
+import json
 class CourseHomeView(APIView):
 
     def get(self, request, *args, **kwargs):
@@ -59,4 +62,40 @@ class SectorCourse(APIView):
                 "sector_name":sector[0].name,
                 "total_student":total_student
             }, status=status.HTTP_200_OK)
+    
+
+class SearchCourse(APIView):    
+    def get(self, request, search_term):
+        matches = Course.objects.filter(Q(title__icontains=search_term) | Q(description__icontains=search_term))
+        serializer = CourseListSerializer(matches, many=True)
+        return Response(data = serializer.data, status = status.HTTP_200_OK)
+    
+
+class AddComment(APIView):
+    def post(self,request, course_uuid):
+        try:
+            course = Course.objects.get(course_uuid = course_uuid)
+        except Course.DoesNotExist:
+            return HttpResponseBadRequest("Course does not exist")
         
+        try:
+            content = content = json.loads(request.body)
+        except json.decoder.JSONDecodeError:
+            return Response('Please data a json body',status = status.HTTP_400_BAD_REQUEST)
+
+        
+
+        if not content.get('message'):
+            return Response(status = status.HTTP_400_BAD_REQUEST)
+        
+        serializer = CommentSerializer(data=content)
+
+        if serializer.is_valid():
+            author = User.objects.get(id=1)
+            comment = serializer.save(user= author)
+            # comment = serializer.save(user= request.user)
+            course.comments.add(comment)
+            return Response(status = status.HTTP_201_CREATED)
+        else:
+            return Response(data = serializer.errors,status = status.HTTP_400_BAD_REQUEST)
+            

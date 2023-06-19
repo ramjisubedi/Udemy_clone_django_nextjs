@@ -73,14 +73,15 @@ class CourseListSerializer(ModelSerializer):
     total_lectures = serializers.IntegerField(source='get_total_lectures')
     class Meta:
         model = Course
-        fields = '__all__'
-        # field_names = [
-        #     'course_uuid',
-        #     'student_no',
-        #     'author',
-        #     'price',
-        #     'image_url',
-        #     'description',
-        #     'total_lecturse'
-        #     ]
+        # fields = '__all__'
+        fields = [
+            'course_uuid',
+            'title',
+            'student_no',
+            'author',
+            'price',
+            'image_url',
+            'description',
+            'total_lectures'
+            ]
 
