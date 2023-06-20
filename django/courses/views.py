@@ -149,4 +149,4 @@ class CourseStudy(APIView):
         
         serializer = CoursePaidSerializer(course)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)

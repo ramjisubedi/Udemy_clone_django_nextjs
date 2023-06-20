@@ -63,7 +63,7 @@ class CourseSectionpaidSerializer(ModelSerializer):
     total_duration = serializers.CharField(source = 'total_lenght')
     class Meta:
         model = CourseSection
-        fields = ['section_title', 'episodes', 'total_duration',]
+        fields = ['title', 'episodes', 'total_duration',]
 
 class CourseUnpaidSerializer(ModelSerializer):
 
@@ -107,7 +107,7 @@ class CartItemSerializer(ModelSerializer):
         fields = ['author','title','price','image_url']
 
 class CoursePaidSerializer(ModelSerializer):
-    Comment = CommentSerializer(many=True)
+    comments = CommentSerializer(many=True)
     author = UserSerializer()
     course_section = CourseSectionpaidSerializer(many=True)
     student_no = serializers.IntegerField(source = 'get_enrolled_student')
