@@ -1,6 +1,6 @@
 from django.urls import path
 from courses.views import CourseHomeView
-from courses.views import CourseDetail, SectorCourse, SearchCourse, AddComment
+from courses.views import CourseDetail, SectorCourse, SearchCourse, AddComment, GetCartDetails
 
 urlpatterns = [
     path('', CourseHomeView.as_view()),
@@ -8,5 +8,6 @@ urlpatterns = [
     path('<uuid:sector_uuid>/', SectorCourse.as_view()),
     path('search/<str:search_term>/', SearchCourse.as_view()),
     path('comment/<course_uuid>/', AddComment.as_view()),
+    path('cart/', GetCartDetails.as_view()),
 
 ]

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.http import HttpResponseBadRequest
 from rest_framework.views import APIView
 
@@ -5,7 +6,7 @@ from users.models import User
 from .models import Sector, Course
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CourseDisplaySerializer, CourseListSerializer, CourseUnpaidSerializer, CommentSerializer
+from .serializers import CourseDisplaySerializer, CourseListSerializer, CourseUnpaidSerializer, CommentSerializer, CartItemSerializer
 from django.db.models import Q
 import json
 class CourseHomeView(APIView):
@@ -98,4 +99,37 @@ class AddComment(APIView):
             return Response(status = status.HTTP_201_CREATED)
         else:
             return Response(data = serializer.errors,status = status.HTTP_400_BAD_REQUEST)
+
+
+class GetCartDetails(APIView):
+    def post(self, request):
+        try:
+            body = json.loads(request.body)
+        except json.decoder.JSONDecodeError:
+            return HttpResponseBadRequest()
+        
+        if type(body.get('cart')) != list:
+            return HttpResponseBadRequest()
+        
+        if len(body.get('cart')) == 0:
+            return Response([])
+        
+        courses=[]
+        for uuid in body.get('cart'):
+            item = Course.objects.filter(course_uuid=uuid)
+
+            if not item:
+                return HttpResponseBadRequest()
             
+            courses.append(item[0])
+
+        serializer= CartItemSerializer(courses, many=True)
+        cart_total = Decimal(0.00)
+
+        for item in serializer.data:
+            cart_total += Decimal(item.get('price'))
+        
+        return Response(dtaa={
+            "cart_detail":serializer.data,
+            "cart_total":cart_total,
+        },status=status.HTTP_200_OK)
